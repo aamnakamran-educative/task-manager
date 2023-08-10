@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { compareAsc } from 'date-fns'; // Import the compareAsc function
 import TaskForm from './TaskForm';
 import TaskList from './TaskList';
 import './App.css';
@@ -30,7 +31,8 @@ function App() {
       if (task.id === taskId) {
         return {
           ...task,
-          status: task.status === 'not done' ? 'done' : 'not done'
+          status: task.status === 'not done' ? 'done' : 'not done',
+          completed: !task.completed
         };
       }
       return task;
@@ -43,6 +45,18 @@ function App() {
     setTasks(updatedTasks);
   };
 
+  const sortTasks = (tasks) => {
+    const notDoneTasks = tasks.filter(task => !task.completed);
+    const doneTasks = tasks.filter(task => task.completed);
+
+    const sortedNotDoneTasks = notDoneTasks.sort((a, b) => a.dueDate - b.dueDate);
+    const sortedDoneTasks = doneTasks.sort((a, b) => a.dueDate - b.dueDate);
+
+    return [...sortedNotDoneTasks, ...sortedDoneTasks];
+  };
+
+  const sortedTasks = sortTasks(tasks);
+  
   return (
     <div className="container mt-5">
       <h1 className="text-center mb-4">Task Manager</h1>
@@ -55,7 +69,7 @@ function App() {
         setDueDate={setDueDate}
         addTask={addTask}
       />
-      <TaskList tasks={tasks} toggleStatus={toggleStatus} removeTask={removeTask} />
+      <TaskList tasks={sortedTasks} toggleStatus={toggleStatus} removeTask={removeTask} />
     </div>
   );
 }
